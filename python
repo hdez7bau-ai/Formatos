@@ -1,0 +1,83 @@
+from flask import Flask, render_template, request, send_file
+from playwright.sync_api import sync_playwright
+from io import BytesIO
+import os
+
+app = Flask(__name__, template_folder=os.path.dirname(os.path.abspath(__file__)))
+app.jinja_env.autoescape = True
+
+
+def leer_filas(formulario, columnas):
+    valores = {
+        campo: formulario.getlist(nombre)
+        for campo, nombre in columnas.items()
+    }
+    cantidad = max((len(columna) for columna in valores.values()), default=0)
+    filas = [
+        {
+            campo: valores[campo][indice] if indice < len(valores[campo]) else ''
+            for campo in columnas
+        }
+        for indice in range(cantidad)
+    ]
+    return [fila for fila in filas if any(valor.strip() for valor in fila.values())]
+
+
+@app.route('/')
+def index():
+    return render_template('html')
+
+@app.route('/generar-pdf', methods=['POST'])
+def generar_pdf():
+    datos = request.form.to_dict()
+    datos['funciones'] = leer_filas(request.form, {
+        'numero': 'funcion_num[]',
+        'descripcion': 'funcion_descripcion[]',
+    })
+    datos['comites_internos'] = leer_filas(request.form, {
+        'nombre': 'comite_int_nombre[]',
+        'objeto': 'comite_int_objeto[]',
+        'funcion': 'comite_int_funcion[]',
+        'periodicidad': 'comite_int_periodicidad[]',
+    })
+    datos['comites_externos'] = leer_filas(request.form, {
+        'nombre': 'comite_ext_nombre[]',
+        'objeto': 'comite_ext_objeto[]',
+        'funcion': 'comite_ext_funcion[]',
+        'periodicidad': 'comite_ext_periodicidad[]',
+    })
+    datos['idiomas'] = leer_filas(request.form, {
+        'nombre': 'idioma_nombre[]',
+        'nivel': 'idioma_nivel[]',
+    })
+    datos['competencias'] = leer_filas(request.form, {
+        'nombre': 'competencia_nombre[]',
+        'nivel': 'competencia_nivel[]',
+        'descripcion': 'competencia_descripcion[]',
+    })
+    datos['innovacion_opciones'] = request.form.getlist('innovacion_opciones')
+
+    html_lleno = render_template('html2', **datos)
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        try:
+            page = browser.new_page()
+            page.set_content(html_lleno, wait_until='networkidle')
+            pdf_output = page.pdf(
+                format='A4',
+                print_background=True,
+                prefer_css_page_size=True,
+            )
+        finally:
+            browser.close()
+
+    return send_file(
+        BytesIO(pdf_output),
+        as_attachment=False,
+        download_name='Puesto_Generado.pdf',
+        mimetype='application/pdf'
+    )
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Perfil de puesto | Fogatotas</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #242321;
+            --muted: #66635e;
+            --paper: #ffffff;
+            --canvas: #f1f0ec;
+            --line: #d9d5ce;
+            --brand: #7d2038;
+            --brand-dark: #5c1428;
+            --accent: #a9bd62;
+            --focus: #246b65;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--canvas); color: var(--ink); font: 15px/1.5 "Segoe UI", sans-serif; }
+        .masthead { background: var(--brand-dark); color: #fff; padding: 22px max(22px, calc((100vw - 1080px) / 2)); border-bottom: 5px solid var(--accent); }
+        .brand { margin: 0; font-size: 17px; font-weight: 700; }
+        .brand span { color: #d8e5a4; }
+        main { width: min(1080px, calc(100% - 32px)); margin: 28px auto 56px; }
+        .page-heading { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 20px; }
+        h1 { margin: 0; font-size: 29px; line-height: 1.2; }
+        .page-heading p { margin: 6px 0 0; color: var(--muted); }
+        form { display: grid; gap: 16px; }
+        fieldset { min-width: 0; margin: 0; padding: 0; border: 1px solid var(--line); background: var(--paper); }
+        legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+        .section-heading { display: flex; align-items: center; gap: 12px; padding: 13px 18px; background: #e8e6df; border-bottom: 1px solid var(--line); }
+        .section-number { display: grid; place-items: center; width: 29px; height: 29px; flex: 0 0 29px; background: var(--brand); color: #fff; font-size: 13px; font-weight: 700; }
+        h2 { margin: 0; font-size: 17px; }
+        .section-body { padding: 19px; }
+        .subheading { margin: 22px 0 12px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 15px; }
+        .subheading:first-child { margin-top: 0; padding-top: 0; border: 0; }
+        .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px 18px; }
+        .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .field { min-width: 0; }
+        .field.wide { grid-column: 1 / -1; }
+        label, .field-label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 700; }
+        .help-tip { position: relative; display: inline-grid; place-items: center; width: 17px; height: 17px; margin-left: 5px; border: 1px solid var(--focus); border-radius: 50%; color: var(--focus); font-size: 11px; font-weight: 700; line-height: 1; cursor: help; vertical-align: middle; }
+        .help-tip::after { position: absolute; z-index: 10; bottom: calc(100% + 8px); left: 0; width: min(260px, calc(100vw - 40px)); padding: 9px 11px; border-radius: 3px; background: #242321; color: #fff; content: attr(data-tip); font-size: 12px; font-weight: 400; line-height: 1.4; white-space: normal; visibility: hidden; opacity: 0; pointer-events: none; }
+        .help-tip:hover::after, .help-tip:focus::after { visibility: visible; opacity: 1; }
+        .field-example { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; font-weight: 400; line-height: 1.35; }
+        td .field-example { min-width: 120px; max-width: 230px; }
+        input, select, textarea { width: 100%; min-height: 42px; padding: 9px 11px; border: 1px solid #bdb8b0; border-radius: 3px; background: #fff; color: var(--ink); font: inherit; }
+        textarea { min-height: 104px; resize: vertical; }
+        input:focus, select:focus, textarea:focus { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--focus); }
+        .table-wrap { overflow-x: auto; border: 1px solid var(--line); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { min-width: 145px; padding: 9px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+        th { background: #f5f4f0; font-size: 12px; }
+        td:last-child, th:last-child { min-width: 95px; width: 95px; }
+        td input, td textarea, td select { min-width: 120px; }
+        td textarea { min-height: 68px; }
+        .table-actions { display: flex; justify-content: flex-end; padding-top: 9px; }
+        .choice-list { display: flex; flex-wrap: wrap; gap: 10px 20px; }
+        .choice { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; }
+        .choice input { width: 17px; min-height: 17px; height: 17px; accent-color: var(--brand); }
+        .actions { display: flex; justify-content: flex-end; }
+        button { min-height: 40px; padding: 8px 13px; border: 1px solid var(--brand); border-radius: 3px; background: var(--brand); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+        button:hover { background: var(--brand-dark); }
+        button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+        .secondary { background: #fff; color: var(--brand); }
+        .secondary:hover { background: #f8eef0; color: var(--brand-dark); }
+        .remove-row { min-height: 34px; padding: 4px 9px; white-space: nowrap; }
+        .remove-row:disabled { border-color: #c8c4bd; background: #e9e7e2; color: #77736c; cursor: not-allowed; }
+        .submit { min-height: 48px; padding-inline: 22px; }
+        @media (max-width: 700px) {
+            .masthead { padding: 17px 18px; }
+            main { width: min(100% - 20px, 600px); margin-top: 18px; }
+            .page-heading { display: block; }
+            h1 { font-size: 25px; }
+            .section-body { padding: 14px; }
+            .grid, .grid.three { grid-template-columns: minmax(0, 1fr); }
+            .field.wide { grid-column: auto; }
+            .actions button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <header class="masthead">
+        <p class="brand"><span>FOGATOTAS</span> S.A de C.V</p>
+    </header>
+    <main>
+        <div class="page-heading">
+            <div>
+                <h1>Perfil integral del puesto</h1>
+                <p>Captura de identificación, funciones y perfil requerido.</p>
+            </div>
+        </div>
+
+        <form action="/generar-pdf" method="POST" target="_blank">
+            <fieldset>
+                <legend>Encabezado e identificación general</legend>
+                <div class="section-heading"><span class="section-number">01</span><h2>Encabezado e identificación general <span class="help-tip" tabindex="0" aria-label="Ayuda: datos para identificar el puesto y su ubicación organizacional" title="Datos para identificar el puesto y su ubicación organizacional." data-tip="Datos para identificar el puesto y su ubicación organizacional.">?</span></h2></div>
+                <div class="section-body">
+                    <div class="grid">
+                        <div class="field"><label for="codigo_puesto">Código del puesto</label><input id="codigo_puesto" name="codigo_puesto" required></div>
+                        <div class="field"><label for="nivel_tabular">Nivel tabular</label><input id="nivel_tabular" name="nivel_tabular" required></div>
+                        <div class="field"><label for="denominacion_puesto">Denominación del puesto</label><input id="denominacion_puesto" name="denominacion_puesto" required></div>
+                        <div class="field"><label for="caracteristica_ocupacional">Característica ocupacional</label><input id="caracteristica_ocupacional" name="caracteristica_ocupacional" placeholder="Ej. Designación directa, SPC"></div>
+                    </div>
+                    <h3 class="subheading">Datos generales e identificación</h3>
+                    <div class="grid three">
+                        <div class="field"><label for="institucion">Nombre de la institución</label><input id="institucion" name="institucion" value="Fogatotas S.A de C.V"></div>
+                        <div class="field"><label for="rama_cargo">Rama de cargo</label><input id="rama_cargo" name="rama_cargo"></div>
+                        <div class="field"><label for="nombramiento">Nombramiento</label><input id="nombramiento" name="nombramiento" placeholder="Ej. Confianza, Base"></div>
+                        <div class="field"><label for="superior_jerarquico">Puesto del superior jerárquico</label><input id="superior_jerarquico" name="superior_jerarquico"></div>
+                        <div class="field"><label for="unidad_administrativa">Unidad administrativa</label><input id="unidad_administrativa" name="unidad_administrativa"></div>
+                        <div class="field"><label for="tipo_funciones">Tipo de funciones</label><select id="tipo_funciones" name="tipo_funciones"><option value="">Seleccionar</option><option>Administrativas</option><option>Operativas</option><option>Técnicas</option><option>Mixtas</option><option>Otra</option></select></div>
+                        <div class="field wide"><label for="puestos_reportan">Puestos que le reportan directamente</label><textarea id="puestos_reportan" name="puestos_reportan"></textarea></div>
+                        <div class="field"><label for="personas_directas">Personas a cargo: directas</label><input id="personas_directas" name="personas_directas" type="number" min="0" step="1"></div>
+                        <div class="field"><label for="personas_indirectas">Personas a cargo: indirectas</label><input id="personas_indirectas" name="personas_indirectas" type="number" min="0" step="1"></div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Objetivo y funciones</legend>
+                <div class="section-heading"><span class="section-number">02</span><h2>Objetivo y funciones <span class="help-tip" tabindex="0" aria-label="Ayuda: propósito del puesto y actividades que realiza" title="Propósito del puesto y actividades que realiza." data-tip="Propósito del puesto y actividades que realiza.">?</span></h2></div>
+                <div class="section-body">
+                    <div class="field"><label for="objetivo_puesto">Objetivo general del puesto</label><textarea id="objetivo_puesto" name="objetivo_puesto" rows="5"></textarea></div>
+                    <h3 class="subheading">Funciones del puesto</h3>
+                    <div class="table-wrap"><table>
+                        <thead><tr><th>Número de función</th><th>Descripción de la función</th><th>Acción</th></tr></thead>
+                        <tbody id="funciones-body"></tbody>
+                    </table></div>
+                    <div class="table-actions"><button class="secondary" type="button" data-add-row="funciones">+ Añadir función</button></div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Relaciones internas y externas</legend>
+                <div class="section-heading"><span class="section-number">03</span><h2>Relaciones internas y externas <span class="help-tip" tabindex="0" aria-label="Ayuda: completa esta sección solo si el puesto requiere estas relaciones" title="Completa esta sección solo si el puesto requiere relaciones con otras áreas, proveedores, clientes o comités." data-tip="Completa esta sección solo si el puesto requiere relaciones con otras áreas, proveedores, clientes o comités.">?</span></h2></div>
+                <div class="section-body">
+                    <div class="field relation-toggle">
+                        <label for="relaciones_aplican">¿Este puesto requiere registrar relaciones internas o externas?</label>
+                        <select id="relaciones_aplican" name="relaciones_aplican">
+                            <option value="no" selected>No es necesario para este puesto</option>
+                            <option value="si">Sí, se necesitan registrar</option>
+                        </select>
+                    </div>
+                    <div id="relaciones-detalles" hidden>
+                    <h3 class="subheading">Relaciones internas</h3>
+                    <div class="grid three">
+                        <div class="field"><label for="clientes_internos">Clientes internos</label><textarea id="clientes_internos" name="clientes_internos"></textarea></div>
+                        <div class="field"><label for="proveedores_internos">Proveedores internos</label><textarea id="proveedores_internos" name="proveedores_internos"></textarea></div>
+                        <div class="field"><label for="para_que_se_relaciona_int">Motivo de relación</label><textarea id="para_que_se_relaciona_int" name="para_que_se_relaciona_int"></textarea></div>
+                    </div>
+                    <h3 class="subheading">Comités internos y juntas formales</h3>
+                    <div class="table-wrap"><table>
+                        <thead><tr><th>Nombre del comité</th><th>Objeto</th><th>Función desempeñada</th><th>Periodicidad</th><th>Acción</th></tr></thead>
+                        <tbody id="comites-internos-body"></tbody>
+                    </table></div>
+                    <div class="table-actions"><button class="secondary" type="button" data-add-row="comites-internos">+ Añadir comité interno</button></div>
+
+                    <h3 class="subheading">Relaciones externas</h3>
+                    <div class="grid three">
+                        <div class="field"><label for="clientes_externos">Clientes externos</label><textarea id="clientes_externos" name="clientes_externos"></textarea></div>
+                        <div class="field"><label for="proveedores_externos">Proveedores externos</label><textarea id="proveedores_externos" name="proveedores_externos"></textarea></div>
+                        <div class="field"><label for="para_que_se_relaciona_ext">Motivo de relación</label><textarea id="para_que_se_relaciona_ext" name="para_que_se_relaciona_ext"></textarea></div>
+                    </div>
+                    <h3 class="subheading">Comités externos</h3>
+                    <div class="table-wrap"><table>
+                        <thead><tr><th>Nombre del comité</th><th>Objeto</th><th>Función desempeñada</th><th>Periodicidad</th><th>Acción</th></tr></thead>
+                        <tbody id="comites-externos-body"></tbody>
+                    </table></div>
+                    <div class="table-actions"><button class="secondary" type="button" data-add-row="comites-externos">+ Añadir comité externo</button></div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Aspectos relevantes del puesto</legend>
+                <div class="section-heading"><span class="section-number">04</span><h2>Aspectos relevantes del puesto <span class="help-tip" tabindex="0" aria-label="Ayuda: decisiones, contribuciones y obligaciones del puesto" title="Describe la autoridad, contribución y obligaciones asociadas al puesto." data-tip="Describe la autoridad, contribución y obligaciones asociadas al puesto.">?</span></h2></div>
+                <div class="section-body">
+                    <h3 class="subheading">Autoridad y facultades</h3>
+                    <div class="grid">
+                        <div class="field"><label for="decisiones_sin_consultar">Decisiones que toma sin consultar</label><textarea id="decisiones_sin_consultar" name="decisiones_sin_consultar"></textarea></div>
+                        <div class="field"><label for="objetivo_decisiones_sin_consultar">Objetivo de esas decisiones</label><textarea id="objetivo_decisiones_sin_consultar" name="objetivo_decisiones_sin_consultar"></textarea></div>
+                        <div class="field"><label for="decisiones_conjuntas">Decisiones que toma conjuntamente</label><textarea id="decisiones_conjuntas" name="decisiones_conjuntas"></textarea></div>
+                        <div class="field"><label for="objetivo_decisiones_conjuntas">Objetivo de las decisiones conjuntas</label><textarea id="objetivo_decisiones_conjuntas" name="objetivo_decisiones_conjuntas"></textarea></div>
+                    </div>
+                    <h3 class="subheading">Innovación, optimización y contribución</h3>
+                    <span class="field-label">Opciones aplicables <span class="help-tip" tabindex="0" aria-label="Ayuda: selecciona las actividades de innovación que corresponden al puesto" title="Selecciona las actividades de innovación que corresponden al puesto." data-tip="Selecciona las actividades de innovación que corresponden al puesto.">?</span></span>
+                    <div class="choice-list">
+                        <label class="choice"><input type="checkbox" name="innovacion_opciones" value="Atención">Atención</label>
+                        <label class="choice"><input type="checkbox" name="innovacion_opciones" value="Búsqueda">Búsqueda</label>
+                        <label class="choice"><input type="checkbox" name="innovacion_opciones" value="Aplicación">Aplicación</label>
+                        <label class="choice"><input type="checkbox" name="innovacion_opciones" value="Fomento">Fomento</label>
+                        <label class="choice"><input type="checkbox" name="innovacion_opciones" value="Investigación">Investigación</label>
+                    </div>
+                    <small class="field-example">Ejemplo: Aplicación y Fomento.</small>
+                    <h3 class="subheading">Servicio al ciudadano y declaración patrimonial</h3>
+                    <div class="grid">
+                        <div class="field"><label for="servicio_ciudadano">¿El puesto brinda servicio al ciudadano?</label><select id="servicio_ciudadano" name="servicio_ciudadano"><option value="">Seleccionar</option><option>SI</option><option>NO</option></select></div>
+                        <div class="field"><label for="declaracion_patrimonial">¿Debe presentar declaración patrimonial?</label><select id="declaracion_patrimonial" name="declaracion_patrimonial"><option value="">Seleccionar</option><option>SI</option><option>NO</option></select></div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Perfil del puesto</legend>
+                <div class="section-heading"><span class="section-number">05</span><h2>Perfil del puesto <span class="help-tip" tabindex="0" aria-label="Ayuda: requisitos académicos, experiencia y competencias" title="Requisitos académicos, experiencia, disponibilidad y competencias necesarias para desempeñar el puesto." data-tip="Requisitos académicos, experiencia, disponibilidad y competencias necesarias para desempeñar el puesto.">?</span></h2></div>
+                <div class="section-body">
+                    <h3 class="subheading">Escolaridad y áreas de conocimiento</h3>
+                    <div class="grid">
+                        <div class="field"><label for="nivel_academico">Nivel académico</label><select id="nivel_academico" name="nivel_academico"><option value="">Seleccionar</option><option>Bachillerato</option><option>Técnico</option><option>Licenciatura</option><option>Especialidad</option><option>Maestría</option><option>Doctorado</option></select></div>
+                        <div class="field"><label for="grado_avance">Grado de avance</label><select id="grado_avance" name="grado_avance"><option value="">Seleccionar</option><option>Titulado</option><option>Pasante</option><option>En curso</option><option>Trunco</option></select></div>
+                        <div class="field wide"><label for="profesiones_areas">Profesión o áreas de conocimiento requeridas</label><textarea id="profesiones_areas" name="profesiones_areas"></textarea></div>
+                    </div>
+                    <h3 class="subheading">Idiomas y nivel de dominio</h3>
+                    <div class="table-wrap"><table>
+                        <thead><tr><th>Idioma</th><th>Nivel de dominio</th><th>Acción</th></tr></thead>
+                        <tbody id="idiomas-body"></tbody>
+                    </table></div>
+                    <div class="table-actions"><button class="secondary" type="button" data-add-row="idiomas">+ Añadir idioma</button></div>
+                    <div class="field" style="margin-top: 18px"><label for="programas_computo">Programas de cómputo y herramientas requeridas</label><textarea id="programas_computo" name="programas_computo"></textarea></div>
+
+                    <h3 class="subheading">Experiencia laboral</h3>
+                    <div class="grid three">
+                        <div class="field wide"><label for="areas_experiencia">Áreas de experiencia</label><textarea id="areas_experiencia" name="areas_experiencia"></textarea></div>
+                        <div class="field"><label for="anos_experiencia_deseable">Años mínimos deseables</label><input id="anos_experiencia_deseable" name="anos_experiencia_deseable" type="number" min="0" step="1"></div>
+                        <div class="field"><label for="anos_experiencia_indispensable">Años mínimos indispensables</label><input id="anos_experiencia_indispensable" name="anos_experiencia_indispensable" type="number" min="0" step="1"></div>
+                    </div>
+
+                    <h3 class="subheading">Requerimientos específicos</h3>
+                    <div class="grid">
+                        <div class="field"><label for="disponibilidad_viajar">Disponibilidad para viajar</label><select id="disponibilidad_viajar" name="disponibilidad_viajar"><option value="">Seleccionar</option><option>SI</option><option>NO</option></select></div>
+                        <div class="field"><label for="cambio_residencia">Disponibilidad para cambio de residencia</label><select id="cambio_residencia" name="cambio_residencia"><option value="">Seleccionar</option><option>SI</option><option>NO</option></select></div>
+                        <div class="field"><label for="horario_trabajo">Horario de trabajo</label><textarea id="horario_trabajo" name="horario_trabajo"></textarea></div>
+                        <div class="field"><label for="periodos_especiales">Periodos especiales requeridos</label><textarea id="periodos_especiales" name="periodos_especiales"></textarea></div>
+                    </div>
+
+                    <h3 class="subheading">Competencias requeridas</h3>
+                    <div class="table-wrap"><table>
+                        <thead><tr><th>Nombre de la competencia</th><th>Nivel de dominio</th><th>Descripción funcional</th><th>Acción</th></tr></thead>
+                        <tbody id="competencias-body"></tbody>
+                    </table></div>
+                    <div class="table-actions"><button class="secondary" type="button" data-add-row="competencias">+ Añadir competencia</button></div>
+                </div>
+            </fieldset>
+
+            <div class="actions"><button class="submit" type="submit">Generar PDF del perfil</button></div>
+        </form>
+    </main>
+
+    <template id="funciones-template">
+        <tr><td><input name="funcion_num[]" aria-label="Número de función"></td><td><textarea name="funcion_descripcion[]" aria-label="Descripción de la función"></textarea></td><td><button class="remove-row" type="button">Quitar</button></td></tr>
+    </template>
+    <template id="comites-internos-template">
+        <tr><td><input name="comite_int_nombre[]" aria-label="Nombre del comité interno"></td><td><textarea name="comite_int_objeto[]" aria-label="Objeto del comité interno"></textarea></td><td><textarea name="comite_int_funcion[]" aria-label="Función en el comité interno"></textarea></td><td><input name="comite_int_periodicidad[]" aria-label="Periodicidad del comité interno"></td><td><button class="remove-row" type="button">Quitar</button></td></tr>
+    </template>
+    <template id="comites-externos-template">
+        <tr><td><input name="comite_ext_nombre[]" aria-label="Nombre del comité externo"></td><td><textarea name="comite_ext_objeto[]" aria-label="Objeto del comité externo"></textarea></td><td><textarea name="comite_ext_funcion[]" aria-label="Función en el comité externo"></textarea></td><td><input name="comite_ext_periodicidad[]" aria-label="Periodicidad del comité externo"></td><td><button class="remove-row" type="button">Quitar</button></td></tr>
+    </template>
+    <template id="idiomas-template">
+        <tr><td><input name="idioma_nombre[]" aria-label="Idioma"></td><td><input name="idioma_nivel[]" aria-label="Nivel de dominio del idioma"></td><td><button class="remove-row" type="button">Quitar</button></td></tr>
+    </template>
+    <template id="competencias-template">
+        <tr><td><input name="competencia_nombre[]" aria-label="Nombre de la competencia"></td><td><select name="competencia_nivel[]" aria-label="Nivel de dominio"><option value="">Seleccionar</option><option>Básico</option><option>Medio</option><option>Avanzado</option></select></td><td><textarea name="competencia_descripcion[]" aria-label="Descripción funcional de la competencia"></textarea></td><td><button class="remove-row" type="button">Quitar</button></td></tr>
+    </template>
+    <script>
+        const rowSets = {
+            funciones: { body: 'funciones-body', template: 'funciones-template' },
+            'comites-internos': { body: 'comites-internos-body', template: 'comites-internos-template' },
+            'comites-externos': { body: 'comites-externos-body', template: 'comites-externos-template' },
+            idiomas: { body: 'idiomas-body', template: 'idiomas-template' },
+            competencias: { body: 'competencias-body', template: 'competencias-template' }
+        };
+
+        function refreshRowControls(body) {
+            const removeButtons = body.querySelectorAll('.remove-row');
+            removeButtons.forEach((button) => {
+                button.disabled = removeButtons.length === 1;
+                button.setAttribute('aria-label', 'Quitar fila');
+            });
+        }
+
+        Object.entries(rowSets).forEach(([key, config]) => {
+            const body = document.getElementById(config.body);
+            const template = document.getElementById(config.template);
+            const addButton = document.querySelector(`[data-add-row="${key}"]`);
+
+            function addRow() {
+                body.append(template.content.cloneNode(true));
+                refreshRowControls(body);
+            }
+
+            addButton.addEventListener('click', addRow);
+            body.addEventListener('click', (event) => {
+                const removeButton = event.target.closest('.remove-row');
+                if (removeButton && body.children.length > 1) {
+                    removeButton.closest('tr').remove();
+                    refreshRowControls(body);
+                }
+            });
+            addRow();
+        });
+    </script>
+    <script>
+        const fieldGuides = {
+            codigo_puesto: { help: 'Clave única que la organización asigna al puesto.', example: 'FG-001' },
+            nivel_tabular: { help: 'Nivel interno que identifica la categoría o rango del puesto.', example: 'N12' },
+            denominacion_puesto: { help: 'Nombre oficial del puesto, sin incluir el nombre de quien lo ocupa.', example: 'Gerente de Operaciones' },
+            caracteristica_ocupacional: { help: 'Régimen o forma en que se ocupa la plaza.', example: 'Designación directa' },
+            institucion: { help: 'Razón social de la empresa o institución.', example: 'Fogatotas S.A de C.V' },
+            rama_cargo: { help: 'Área profesional o funcional a la que pertenece el puesto.', example: 'Operaciones' },
+            nombramiento: { help: 'Tipo de relación laboral o nombramiento.', example: 'Confianza' },
+            superior_jerarquico: { help: 'Nombre del puesto al que reporta directamente.', example: 'Dirección General' },
+            unidad_administrativa: { help: 'Área organizacional donde está adscrito el puesto.', example: 'Gerencia de Operaciones' },
+            tipo_funciones: { help: 'Clasificación principal de las tareas del puesto.', example: 'Administrativas' },
+            puestos_reportan: { help: 'Anota los puestos que reportan directamente a esta posición.', example: 'Analista de compras; auxiliar administrativo' },
+            personas_directas: { help: 'Número de personas que le reportan sin intermediarios.', example: '4' },
+            personas_indirectas: { help: 'Número de personas que dependen del puesto a través de otros mandos.', example: '8' },
+            objetivo_puesto: { help: 'Resume para qué existe el puesto y cuál es su principal resultado esperado.', example: 'Coordinar las operaciones para cumplir las metas de producción.' },
+            relaciones_aplican: { help: 'Indica si las relaciones con áreas, clientes, proveedores o comités son parte real del trabajo. Si no lo son, deja la opción No es necesario.', example: 'Sí, se coordina con proveedores cada semana' },
+            clientes_internos: { help: 'Áreas o personas de la misma organización que reciben el resultado de este puesto.', example: 'Compras y Finanzas' },
+            proveedores_internos: { help: 'Áreas o personas internas que entregan información, materiales o servicios a este puesto.', example: 'Almacén' },
+            para_que_se_relaciona_int: { help: 'Explica brevemente para qué se mantiene la relación interna.', example: 'Validar existencias y coordinar resurtidos' },
+            'comite_int_nombre[]': { help: 'Nombre del comité interno en el que participa el puesto.', example: 'Comité de Seguridad e Higiene' },
+            'comite_int_objeto[]': { help: 'Propósito principal del comité interno.', example: 'Prevenir accidentes en las instalaciones' },
+            'comite_int_funcion[]': { help: 'Responsabilidad o participación que tiene el puesto en el comité.', example: 'Vocal; revisa y da seguimiento a incidentes' },
+            'comite_int_periodicidad[]': { help: 'Cada cuánto se reúne el comité.', example: 'Mensual' },
+            clientes_externos: { help: 'Personas u organizaciones externas que reciben los resultados del puesto.', example: 'Clientes mayoristas' },
+            proveedores_externos: { help: 'Organizaciones externas que suministran bienes o servicios al puesto.', example: 'Proveedor de transporte' },
+            para_que_se_relaciona_ext: { help: 'Explica el propósito de la relación con personas u organizaciones externas.', example: 'Coordinar fechas de entrega y resolver incidencias' },
+            'comite_ext_nombre[]': { help: 'Nombre del comité externo en el que participa el puesto.', example: 'Comité local de protección civil' },
+            'comite_ext_objeto[]': { help: 'Propósito principal del comité externo.', example: 'Coordinar acciones de prevención entre organizaciones' },
+            'comite_ext_funcion[]': { help: 'Responsabilidad del puesto dentro del comité externo.', example: 'Representar a la empresa y compartir avances' },
+            'comite_ext_periodicidad[]': { help: 'Cada cuánto se reúne el comité externo.', example: 'Trimestral' },
+            decisiones_sin_consultar: { help: 'Decisiones que puede tomar por sí mismo dentro de sus atribuciones.', example: 'Reasignar prioridades diarias de surtido' },
+            objetivo_decisiones_sin_consultar: { help: 'Resultado que busca con las decisiones autónomas descritas.', example: 'Mantener la continuidad de la operación' },
+            decisiones_conjuntas: { help: 'Decisiones que requieren acuerdo con otra jefatura o área.', example: 'Aprobar el presupuesto anual con Dirección' },
+            objetivo_decisiones_conjuntas: { help: 'Resultado esperado de las decisiones compartidas.', example: 'Alinear el gasto con las metas de la empresa' },
+            servicio_ciudadano: { help: 'Señala si el puesto atiende o brinda orientación directa al público.', example: 'SI, si atiende personas externas' },
+            declaracion_patrimonial: { help: 'Indica si por las responsabilidades del puesto se debe presentar esta declaración.', example: 'SI, cuando corresponde por normativa' },
+            nivel_academico: { help: 'Nivel de estudios mínimo requerido para desempeñar el puesto.', example: 'Licenciatura' },
+            grado_avance: { help: 'Situación académica que se exige para el nivel seleccionado.', example: 'Titulado' },
+            profesiones_areas: { help: 'Carreras o conocimientos relacionados con las funciones del puesto.', example: 'Administración, Ingeniería Industrial o afín' },
+            'idioma_nombre[]': { help: 'Idioma que se necesita para realizar las funciones.', example: 'Inglés' },
+            'idioma_nivel[]': { help: 'Nivel de comprensión y comunicación requerido en ese idioma.', example: 'Intermedio B2' },
+            programas_computo: { help: 'Sistemas, programas o herramientas que se usan en el puesto.', example: 'Excel avanzado y SAP' },
+            areas_experiencia: { help: 'Sectores o actividades laborales donde se requiere experiencia previa.', example: 'Logística y control de inventarios' },
+            anos_experiencia_deseable: { help: 'Años de experiencia recomendables, pero no obligatorios.', example: '2' },
+            anos_experiencia_indispensable: { help: 'Años de experiencia mínimos que sí son requisito.', example: '4' },
+            disponibilidad_viajar: { help: 'Indica si las funciones requieren viajar fuera del lugar habitual de trabajo.', example: 'SI, para visitas mensuales a sucursales' },
+            cambio_residencia: { help: 'Indica si el puesto puede requerir mudarse a otra ciudad.', example: 'NO' },
+            horario_trabajo: { help: 'Horario habitual o esquema de jornada del puesto.', example: 'Lunes a viernes, 9:00 a 18:00' },
+            periodos_especiales: { help: 'Temporadas o fechas en que se requiere disponibilidad adicional.', example: 'Cierre anual de inventarios en diciembre' },
+            'funcion_num[]': { help: 'Número consecutivo para identificar la función.', example: '1' },
+            'funcion_descripcion[]': { help: 'Describe una actividad relevante que realiza el puesto y su resultado.', example: 'Coordinar el cierre mensual de inventarios.' },
+            'competencia_nombre[]': { help: 'Habilidad o conducta necesaria para realizar el trabajo.', example: 'Liderazgo' },
+            'competencia_nivel[]': { help: 'Grado de dominio requerido para esa competencia.', example: 'Avanzado' },
+            'competencia_descripcion[]': { help: 'Conducta observable que demuestra la competencia en el puesto.', example: 'Organiza al equipo y da seguimiento a compromisos.' },
+            innovacion_opciones: { help: 'Selecciona las acciones de innovación o mejora que forman parte del puesto.', example: 'Aplicación y Fomento' }
+        };
+
+        function createHelpTip(text) {
+            const tip = document.createElement('span');
+            tip.className = 'help-tip';
+            tip.tabIndex = 0;
+            tip.setAttribute('aria-label', `Ayuda: ${text}`);
+            tip.title = text;
+            tip.dataset.tip = text;
+            tip.textContent = '?';
+            return tip;
+        }
+
+        function enhanceFields(root) {
+            root.querySelectorAll('input[name], textarea[name], select[name]').forEach((field) => {
+                const guide = fieldGuides[field.name];
+                if (!guide || field.type === 'checkbox') return;
+
+                field.title = guide.help;
+                const label = field.id ? document.querySelector(`label[for="${CSS.escape(field.id)}"]`) : null;
+                const header = field.closest('td')?.closest('table')?.tHead?.rows[0]?.cells[field.closest('td').cellIndex];
+                const helpTarget = label || header;
+                if (helpTarget && !helpTarget.querySelector('.help-tip')) {
+                    helpTarget.append(createHelpTip(guide.help));
+                }
+
+                if (!field.nextElementSibling?.classList.contains('field-example')) {
+                    const example = document.createElement('small');
+                    example.className = 'field-example';
+                    example.textContent = `Ejemplo: ${guide.example}`;
+                    field.after(example);
+                }
+            });
+        }
+
+        enhanceFields(document);
+        const innovationLabel = document.querySelector('.field-label');
+        const innovationGuide = fieldGuides.innovacion_opciones;
+        if (innovationLabel && !innovationLabel.querySelector('.help-tip')) {
+            innovationLabel.append(createHelpTip(innovationGuide.help));
+        }
+
+        const relationsToggle = document.getElementById('relaciones_aplican');
+        const relationsDetails = document.getElementById('relaciones-detalles');
+        function updateRelationsVisibility() {
+            const showDetails = relationsToggle.value === 'si';
+            relationsDetails.hidden = !showDetails;
+            relationsDetails.querySelectorAll('input, textarea, select').forEach((field) => {
+                field.disabled = !showDetails;
+            });
+        }
+        relationsToggle.addEventListener('change', updateRelationsVisibility);
+        updateRelationsVisibility();
+    </script>
+</body>
+</html>
